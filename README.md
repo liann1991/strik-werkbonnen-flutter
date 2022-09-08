@@ -1,3 +1,3 @@
 # strik-werkbonnen-flutter
 
-Flutter app for Strik Werkbonnen
+Flutter app for Strik Werkbonnen 
