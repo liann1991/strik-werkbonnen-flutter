@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_backend/welcome/welcome_page.dart';
+import 'package:form_builder_validators/localization/l10n.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,6 +17,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
         primaryColor: Colors.black,
       ),
+        localizationsDelegates: [
+          FormBuilderLocalizations.delegate,
+        ],
       home: WelcomePage(),
     );
   }

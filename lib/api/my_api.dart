@@ -14,12 +14,15 @@ class CallApi{
     var fullUrl = _url + apiUrl;
     return await http.post(
         Uri.parse(fullUrl),
-        body: jsonEncode(data),
-        headers: {
+        headers:
+        {
           'Content-type' : 'application/json',
           'Accept' : 'application/json',
           'Authorization' : 'Bearer $token'
-        }
+        },
+      body: jsonEncode(<String, String>{
+        'omschrijving': data,
+      }),
     );
   }
   getData(apiUrl) async {

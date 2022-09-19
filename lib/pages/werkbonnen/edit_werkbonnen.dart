@@ -40,8 +40,6 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
   bool readOnly = false;
   bool showSegmentedControl = true;
   final _formKey = GlobalKey<FormBuilderState>();
-  var werkomschrijvingen = <WerkomschrijvingData>[];
-
   var userInfo = '';
   // bool _ageHasError = false;
   bool _genderHasError = false;
@@ -62,8 +60,6 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     }
     return woy;
   }
-
-  var genderOptions = ['hoi', 'hallo', 'hai'];
 
   @override
   void initState() {
@@ -86,15 +82,14 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     }
     await _initData();
   }
+
+  List werkomschrijvingen = [];
+
   _initData() async {
     CallApi().getPublicData("werkomschrijving").then((response){
-      // print(json.decode(response.body)['data']);
+      var resBody = json.decode(response.body)['data'];
       setState(() {
-        // List list = (jsonDecode(response.body)['data'] as List<dynamic>) ;
-        Iterable list = json.decode(response.body)['data'];
-        print(list);
-        werkomschrijvingen= list.map((model)=>WerkomschrijvingData.fromJson(model)).toList();
-        print(werkomschrijvingen);
+        werkomschrijvingen = resBody;
       });
     });
   }
@@ -106,8 +101,6 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     initializeDateFormatting('nl_NL', null);
     final dateStr = DateFormat('yyyy-MM-dd').format(this.widget.werkbonnen.datum);
     DateFormat inputFormat = DateFormat('hh:mm:ss');
-    List omschrijvingen = List.from(werkomschrijvingen);
-    print(omschrijvingen);
 
     return Scaffold(
       drawer: Menu(),
@@ -200,18 +193,17 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                             ? const Icon(Icons.error)
                             : const Icon(Icons.check),
                       ),
-                      // initialValue: 'Male',
+                      initialValue: this.widget.werkbonnen.werkomschrijving.id.toString(),
                       allowClear: true,
                       hint: const Text('Selecteer omschrijving'),
                       validator: FormBuilderValidators.compose(
                           [FormBuilderValidators.required()]),
-                      items: genderOptions
-                          .map((gender) => DropdownMenuItem(
-                        alignment: AlignmentDirectional.center,
-                        value: gender,
-                        child: Text(gender),
-                      ))
-                          .toList(),
+                      items: werkomschrijvingen.map((item) {
+                        return new DropdownMenuItem(
+                          child: new Text(item['omschrijving']),
+                          value: item['id'].toString(),
+                        );
+                      }).toList(),
                       onChanged: (val) {
                         setState(() {
                           _genderHasError = !(_formKey
@@ -575,4 +567,5 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
       ),
     );
   }
+
   }

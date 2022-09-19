@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../components/menu.dart';
 import '../werkbonnen/detail_werkbonnen.dart';
+import 'create_werkomschrijving.dart';
 import 'detail_werkomschrijving.dart';
 
 class WerkomschrijvingenPage extends StatefulWidget {
@@ -108,6 +109,20 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                             text:"Omschrijving:",
                             fontSize: 16,
                             color:Colors.black
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            onPrimary: Colors.white,
+                            primary: Colors.blue,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CreateWerkomschrijvingPage()),
+                            );
+                          },
+                          icon: Icon(Icons.add, size: 20),
+                          label: Text("Nieuwe omschrijving"),
                         ),
                         Divider(),
                       ],

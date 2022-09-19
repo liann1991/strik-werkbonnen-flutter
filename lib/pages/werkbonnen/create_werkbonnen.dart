@@ -38,6 +38,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
   bool autoValidate = true;
   bool readOnly = false;
   bool showSegmentedControl = true;
+  var userInfo = '';
   final _formKey = GlobalKey<FormBuilderState>();
   bool _genderHasError = false;
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
@@ -58,7 +59,38 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
     return woy;
   }
 
-  var genderOptions = ['hoi', 'hallo', 'hai'];
+  @override
+  void initState() {
+    _getWerkomschrijvingen();
+    super.initState();
+  }
+
+  _getWerkomschrijvingen() async {
+    SharedPreferences localStorage = await SharedPreferences.getInstance();
+    var user = localStorage.getString("username");
+    if(user!=null){
+      setState(() {
+        userInfo = user;
+        debugPrint(userInfo);
+      });
+    }else{
+      setState(() {
+        debugPrint("no info");
+      });
+    }
+    await _initData();
+  }
+
+  List werkomschrijvingen = [];
+
+  _initData() async {
+    CallApi().getPublicData("werkomschrijving").then((response){
+      var resBody = json.decode(response.body)['data'];
+      setState(() {
+        werkomschrijvingen = resBody;
+      });
+    });
+  }
 
   void _onChanged(dynamic val) => debugPrint(val.toString());
 
@@ -135,18 +167,16 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                             ? const Icon(Icons.error)
                             : const Icon(Icons.check),
                       ),
-                      // initialValue: 'Male',
                       allowClear: true,
                       hint: const Text('Selecteer omschrijving'),
                       validator: FormBuilderValidators.compose(
                           [FormBuilderValidators.required()]),
-                      items: genderOptions
-                          .map((gender) => DropdownMenuItem(
-                        alignment: AlignmentDirectional.center,
-                        value: gender,
-                        child: Text(gender),
-                      ))
-                          .toList(),
+                      items: werkomschrijvingen.map((item) {
+                        return new DropdownMenuItem(
+                          child: new Text(item['omschrijving']),
+                          value: item['id'].toString(),
+                        );
+                      }).toList(),
                       onChanged: (val) {
                         setState(() {
                           _genderHasError = !(_formKey
