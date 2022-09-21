@@ -14,14 +14,59 @@ class CallApi{
     var fullUrl = _url + apiUrl;
     return await http.post(
         Uri.parse(fullUrl),
-        headers:
-        {
+        body: jsonEncode(data),
+        headers: {
           'Content-type' : 'application/json',
           'Accept' : 'application/json',
           'Authorization' : 'Bearer $token'
-        },
+        }
+    );
+  }
+  postOmschrijvingData(data, apiUrl) async {
+    var token = await _getToken();
+    var fullUrl = _url + apiUrl;
+    return await http.post(
+      Uri.parse(fullUrl),
+      headers:
+      {
+        'Content-type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer $token'
+      },
       body: jsonEncode(<String, String>{
         'omschrijving': data,
+      }),
+    );
+  }
+  postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, apiUrl) async {
+    var token = await _getToken();
+    var fullUrl = _url + apiUrl;
+    var body = jsonEncode({
+      'weeknummer': weeknummer,
+      'datum': datum,
+      'omschrijving': omschrijving,
+      'begintijd': begintijd,
+      'pauze': pauze,
+      'eindtijd': eindtijd,
+      'totaaltijd': totaaltijd,
+    });
+    print('dit is de body: $body');
+    return await http.post(
+      Uri.parse(fullUrl),
+      headers:
+      {
+        'Content-type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer $token'
+      },
+      body: jsonEncode({
+      'weeknummer': weeknummer,
+      'datum': datum,
+      'omschrijving': omschrijving,
+      'begintijd': begintijd,
+      'pauze': pauze,
+      'eindtijd': eindtijd,
+      'totaaltijd': totaaltijd,
       }),
     );
   }

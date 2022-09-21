@@ -34,13 +34,31 @@ class CreateWerkbonnenPage extends StatefulWidget {
   _CreateWerkbonnenPageState createState() => _CreateWerkbonnenPageState();
 }
 
+postWerkbon(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd) async {
+  CallApi().postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, "werkbonnen");
+  print('gelukt!, $weeknummer, $datum, $omschrijving, $begintijd, $pauze, $eindtijd, $totaaltijd');
+}
+
+class FormModel {
+  int weeknummer;
+  DateTime datum;
+  String omschrijving;
+  DateTime begintijd;
+  DateTime pauze;
+  DateTime eindtijd;
+  DateTime totaaltijd;
+  FormModel({this.weeknummer, this.datum, this.omschrijving, this.begintijd, this.pauze, this.eindtijd, this.totaaltijd});
+}
+
 class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
   bool autoValidate = true;
   bool readOnly = false;
   bool showSegmentedControl = true;
   var userInfo = '';
   final _formKey = GlobalKey<FormBuilderState>();
+  final model = FormModel();
   bool _genderHasError = false;
+
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
   int numOfWeeks(int year) {
     DateTime dec28 = DateTime(year, 12, 28);
@@ -48,7 +66,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
     return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
   }
   /// Calculates week number from a date as per https://en.wikipedia.org/wiki/ISO_week_date#Calculation
-  int weekNumber(DateTime date) {
+  weekNumber(DateTime date) {
     int dayOfYear = int.parse(DateFormat("D").format(date));
     int woy =  ((dayOfYear - date.weekday + 10) / 7).floor();
     if (woy < 1) {
@@ -56,7 +74,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
     } else if (woy > numOfWeeks(date.year)) {
       woy = 1;
     }
-    return woy;
+    model.weeknummer = woy;
   }
 
   @override
@@ -71,7 +89,6 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
     if(user!=null){
       setState(() {
         userInfo = user;
-        debugPrint(userInfo);
       });
     }else{
       setState(() {
@@ -92,7 +109,32 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
     });
   }
 
-  void _onChanged(dynamic val) => debugPrint(val.toString());
+  getTotaaltijd(begintijd, eindtijd, pauze) {
+    var totaaltijd = null;
+    var hours1 = eindtijd.toString().substring(11,13);
+    var hours2 = pauze.toString().substring(11,13);
+    var hours3 = begintijd.toString().substring(11,13);
+    var hours = int.parse(hours1) - int.parse(hours2) - int.parse(hours3);
+    var minute1 = eindtijd.toString().substring(14,16);
+    var minute2 = pauze.toString().substring(14,16);
+    var minute3 = begintijd.toString().substring(14,16);
+    var minutes = int.parse(minute1) - int.parse(minute2) - int.parse(minute3);
+
+    if(minutes<0){
+      hours--;
+      minutes = 60 + minutes;
+      if(minutes<0){
+        hours--;
+        minutes = 60 + minutes;
+      }
+    }
+    var MinuteString = minutes < 10 ? "0" + minutes.toString() : minutes.toString();
+    var HourString = hours < 10 ? "0" + hours.toString() : hours.toString();
+    var tijd = "0001-01-01 " + HourString + ':' + MinuteString + ':00.000';
+    totaaltijd = DateTime.parse(tijd);
+    model.totaaltijd = totaaltijd;
+    _formKey.currentState.fields['totaaltijd'].didChange(totaaltijd);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,16 +168,8 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                 // enabled: false,
                 onChanged: () {
                   _formKey.currentState.save();
-                  debugPrint(_formKey.currentState.value.toString());
                 },
                 autovalidateMode: AutovalidateMode.disabled,
-                initialValue: const {
-                  'movie_rating': 5,
-                  'best_language': 'Dart',
-                  'age': '13',
-                  'gender': 'Male',
-                  'languages_filter': ['Dart']
-                },
                 skipDisabled: true,
                 child: Column(
                   children: <Widget>[
@@ -144,6 +178,8 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       name: 'datum',
                       initialEntryMode: DatePickerEntryMode.calendar,
                       initialValue: DateTime.now(),
+                      format: DateFormat('dd-MM-yyyy'),
+                      // enabled: true,
                       inputType: InputType.date,
                       decoration: InputDecoration(
                         labelText: 'Datum',
@@ -155,8 +191,16 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                           },
                         ),
                       ),
-                      initialTime: const TimeOfDay(hour: 8, minute: 0),
-                      locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      initialDate: DateTime.now(),
+                      // locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.datum = val;
+                        weekNumber(val);
+                      },
+                      onSaved: (value){
+                        model.datum = value;
+                        weekNumber(value);
+                      },
                     ),
                     FormBuilderDropdown<String>(
                       // autovalidate: true,
@@ -178,12 +222,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                         );
                       }).toList(),
                       onChanged: (val) {
-                        setState(() {
-                          _genderHasError = !(_formKey
-                              .currentState?.fields['omschrijving']
-                              ?.validate() ??
-                              false);
-                        });
+                        model.omschrijving = val;
                       },
                       valueTransformer: (val) => val?.toString(),
                     ),
@@ -191,6 +230,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       name: 'begintijd',
                       initialEntryMode: DatePickerEntryMode.calendar,
                       initialValue: DateTime.now(),
+                      format: DateFormat("HH:mm"),
                       inputType: InputType.time,
                       decoration: InputDecoration(
                         labelText: 'Begintijd',
@@ -204,6 +244,9 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.begintijd = val;
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'pauze',
@@ -222,6 +265,9 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.pauze = val;
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'eindtijd',
@@ -240,6 +286,10 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.eindtijd = val;
+                        getTotaaltijd(model.begintijd, model.eindtijd, model.pauze);
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'totaaltijd',
@@ -269,9 +319,18 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState?.saveAndValidate() ?? false) {
-                          debugPrint(_formKey.currentState?.value.toString());
+                          _formKey.currentState.save();
+                          postWerkbon(model.weeknummer,
+                              model.datum.toString(),
+                              model.omschrijving,
+                              model.begintijd.toString(),
+                              model.pauze.toString(),
+                              model.eindtijd.toString(),
+                              model.totaaltijd.toString()
+                          );
+                          // debugPrint(model.toString());
                         } else {
-                          debugPrint(_formKey.currentState?.value.toString());
+                          // debugPrint(_formKey.currentState?.value.toString());
                           debugPrint('validation failed');
                         }
                       },

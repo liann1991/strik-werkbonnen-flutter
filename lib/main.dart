@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_backend/welcome/welcome_page.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       ),
         localizationsDelegates: [
           FormBuilderLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
         ],
       home: WelcomePage(),
     );

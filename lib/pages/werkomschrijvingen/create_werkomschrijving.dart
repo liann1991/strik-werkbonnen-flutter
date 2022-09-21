@@ -33,7 +33,7 @@ class CreateWerkomschrijvingPage extends StatefulWidget {
 }
 
 postOmschrijving(data) async {
-  CallApi().postData(data, "werkomschrijving");
+  CallApi().postOmschrijvingData(data, "werkomschrijving");
   print('gelukt!');
 }
 
