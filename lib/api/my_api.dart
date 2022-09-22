@@ -41,16 +41,6 @@ class CallApi{
   postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, apiUrl) async {
     var token = await _getToken();
     var fullUrl = _url + apiUrl;
-    var body = jsonEncode({
-      'weeknummer': weeknummer,
-      'datum': datum,
-      'omschrijving': omschrijving,
-      'begintijd': begintijd,
-      'pauze': pauze,
-      'eindtijd': eindtijd,
-      'totaaltijd': totaaltijd,
-    });
-    print('dit is de body: $body');
     return await http.post(
       Uri.parse(fullUrl),
       headers:
