@@ -10,6 +10,7 @@ import '../../components/menu.dart';
 import '../werkbonnen/detail_werkbonnen.dart';
 import 'create_werkomschrijving.dart';
 import 'detail_werkomschrijving.dart';
+import 'edit_werkomschrijving.dart';
 
 class WerkomschrijvingenPage extends StatefulWidget {
   const WerkomschrijvingenPage({Key key}) : super(key: key);
@@ -176,7 +177,10 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                                                       primary: Colors.lightBlue,
                                                     ),
                                                     onPressed: () {
-                                                      // Respond to button press
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(builder: (context) => EditWerkomschrijvingPage(werkomschrijvingen:werkomschrijvingen, index:0)),
+                                                      );
                                                     },
                                                     icon: Icon(Icons.edit, size: 22),
                                                     label: Text("Wijzigen"),

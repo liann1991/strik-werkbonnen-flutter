@@ -35,14 +35,32 @@ class EditWerkbonnenPage extends StatefulWidget {
   _EditWerkbonnenPageState createState() => _EditWerkbonnenPageState();
 }
 
+updateWerkbon(id, weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd) async {
+  CallApi().updateWerkbonData(id, weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, "werkbonnen");
+  print('gelukt!, $id, $weeknummer, $datum, $omschrijving, $begintijd, $pauze, $eindtijd, $totaaltijd');
+}
+
+class FormModel {
+  int id;
+  int weeknummer;
+  DateTime datum;
+  String omschrijving;
+  DateTime begintijd;
+  DateTime pauze;
+  DateTime eindtijd;
+  DateTime totaaltijd;
+  FormModel({this.weeknummer, this.datum, this.omschrijving, this.begintijd, this.pauze, this.eindtijd, this.totaaltijd, this.id});
+}
+
 class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
   bool autoValidate = true;
   bool readOnly = false;
   bool showSegmentedControl = true;
-  final _formKey = GlobalKey<FormBuilderState>();
   var userInfo = '';
-  // bool _ageHasError = false;
-  bool _genderHasError = false;
+  final _formKey = GlobalKey<FormBuilderState>();
+  final model = FormModel();
+  bool _omschrijvingHasError = false;
+
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
   int numOfWeeks(int year) {
     DateTime dec28 = DateTime(year, 12, 28);
@@ -50,7 +68,7 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     return ((dayOfDec28 - dec28.weekday + 10) / 7).floor();
   }
   /// Calculates week number from a date as per https://en.wikipedia.org/wiki/ISO_week_date#Calculation
-  int weekNumber(DateTime date) {
+  weekNumber(DateTime date) {
     int dayOfYear = int.parse(DateFormat("D").format(date));
     int woy =  ((dayOfYear - date.weekday + 10) / 7).floor();
     if (woy < 1) {
@@ -58,7 +76,7 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     } else if (woy > numOfWeeks(date.year)) {
       woy = 1;
     }
-    return woy;
+    model.weeknummer = woy;
   }
 
   @override
@@ -73,7 +91,6 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     if(user!=null){
       setState(() {
         userInfo = user;
-        debugPrint(userInfo);
       });
     }else{
       setState(() {
@@ -94,19 +111,53 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
     });
   }
 
-  void _onChanged(dynamic val) => debugPrint(val.toString());
+  getTotaaltijd(begintijd, eindtijd, pauze) {
+    print('dit zijn de tijden: $begintijd, $eindtijd, $pauze');
+    var hoi = model.begintijd;
+    print('dit is model: $hoi');
+    var totaaltijd = null;
+    var hours1 = eindtijd.toString().substring(11,13);
+    var hours2 = pauze.toString().substring(11,13);
+    var hours3 = begintijd.toString().substring(11,13);
+    var hours = int.parse(hours1) - int.parse(hours2) - int.parse(hours3);
+    var minute1 = eindtijd.toString().substring(14,16);
+    var minute2 = pauze.toString().substring(14,16);
+    var minute3 = begintijd.toString().substring(14,16);
+    var minutes = int.parse(minute1) - int.parse(minute2) - int.parse(minute3);
+
+    if(minutes<0){
+      hours--;
+      minutes = 60 + minutes;
+      if(minutes<0){
+        hours--;
+        minutes = 60 + minutes;
+      }
+    }
+    var MinuteString = minutes < 10 ? "0" + minutes.toString() : minutes.toString();
+    var HourString = hours < 10 ? "0" + hours.toString() : hours.toString();
+    var tijd = "0001-01-01 " + HourString + ':' + MinuteString + ':00.000';
+    totaaltijd = DateTime.parse(tijd);
+    model.totaaltijd = totaaltijd;
+    _formKey.currentState.fields['totaaltijd'].didChange(totaaltijd);
+    print('en dit is totaaltijd: $totaaltijd');
+  }
 
   @override
   Widget build(BuildContext context) {
     initializeDateFormatting('nl_NL', null);
     final dateStr = DateFormat('yyyy-MM-dd').format(this.widget.werkbonnen.datum);
     DateFormat inputFormat = DateFormat('hh:mm:ss');
+    model.begintijd = DateTime.parse('0001-01-01 ' + this.widget.werkbonnen.begintijd + '.000');
+    model.eindtijd = DateTime.parse('0001-01-01 ' + this.widget.werkbonnen.eindtijd + '.000');
+    model.pauze = DateTime.parse('0001-01-01 ' + this.widget.werkbonnen.pauze + '.000');
+    model.totaaltijd = DateTime.parse('0001-01-01 ' + this.widget.werkbonnen.totaaltijdDag + '.000');
+    model.omschrijving = this.widget.werkbonnen.werkomschrijvingId.toString();
 
     return Scaffold(
       drawer: Menu(),
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text("Wijzig werkbon"),
+        title: Text("Bewerk werkbon"),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -124,44 +175,14 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
         padding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
           child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left:20, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                        icon:
-
-                        Icon(Icons.arrow_back_ios, color:Color(0xFF363f93)),
-                        onPressed:()=> Navigator.pop(context)),
-                    IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                        icon:
-
-                        Icon(Icons.home_outlined, color:Color(0xFF363f93)),
-                        onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>WerkbonnenPage()))),
-                  ],
-                ),
-              ),
+            children: <Widget>[
               FormBuilder(
                 key: _formKey,
                 // enabled: false,
                 onChanged: () {
                   _formKey.currentState.save();
-                  debugPrint(_formKey.currentState.value.toString());
                 },
                 autovalidateMode: AutovalidateMode.disabled,
-                initialValue: const {
-                  'movie_rating': 5,
-                  'best_language': 'Dart',
-                  'age': '13',
-                  'gender': 'Male',
-                  'languages_filter': ['Dart']
-                },
                 skipDisabled: true,
                 child: Column(
                   children: <Widget>[
@@ -170,6 +191,8 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       name: 'datum',
                       initialEntryMode: DatePickerEntryMode.calendar,
                       initialValue: DateTime.tryParse(dateStr),
+                      format: DateFormat('dd-MM-yyyy'),
+                      // enabled: true,
                       inputType: InputType.date,
                       decoration: InputDecoration(
                         labelText: 'Datum',
@@ -181,21 +204,28 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                           },
                         ),
                       ),
-                      initialTime: const TimeOfDay(hour: 8, minute: 0),
-                      locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      initialDate: DateTime.now(),
+                      // locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.datum = val;
+                        weekNumber(val);
+                      },
+                      onSaved: (value){
+                        model.datum = value;
+                        weekNumber(value);
+                      },
                     ),
                     FormBuilderDropdown<String>(
                       // autovalidate: true,
                       name: 'omschrijving',
                       decoration: InputDecoration(
                         labelText: 'omschrijving',
-                        suffix: _genderHasError
+                        suffix: _omschrijvingHasError
                             ? const Icon(Icons.error)
                             : const Icon(Icons.check),
                       ),
-                      initialValue: this.widget.werkbonnen.werkomschrijving.id.toString(),
                       allowClear: true,
-                      hint: const Text('Selecteer omschrijving'),
+                      initialValue: this.widget.werkbonnen.werkomschrijving.id.toString(),
                       validator: FormBuilderValidators.compose(
                           [FormBuilderValidators.required()]),
                       items: werkomschrijvingen.map((item) {
@@ -205,12 +235,7 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                         );
                       }).toList(),
                       onChanged: (val) {
-                        setState(() {
-                          _genderHasError = !(_formKey
-                              .currentState?.fields['omschrijving']
-                              ?.validate() ??
-                              false);
-                        });
+                        model.omschrijving = val;
                       },
                       valueTransformer: (val) => val?.toString(),
                     ),
@@ -218,6 +243,7 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       name: 'begintijd',
                       initialEntryMode: DatePickerEntryMode.calendar,
                       initialValue: inputFormat.parse(this.widget.werkbonnen.begintijd),
+                      format: DateFormat("HH:mm"),
                       inputType: InputType.time,
                       decoration: InputDecoration(
                         labelText: 'Begintijd',
@@ -231,6 +257,10 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.begintijd = val;
+                        getTotaaltijd(model.begintijd.toString(), model.eindtijd.toString(), model.pauze.toString());
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'pauze',
@@ -249,6 +279,10 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.pauze = val;
+                        getTotaaltijd(model.begintijd.toString(), model.eindtijd.toString(), model.pauze.toString());
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'eindtijd',
@@ -267,6 +301,10 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       ),
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
+                      onChanged: (val) {
+                        model.eindtijd = val;
+                        getTotaaltijd(model.begintijd.toString(), model.eindtijd.toString(), model.pauze.toString());
+                      },
                     ),
                     FormBuilderDateTimePicker(
                       name: 'totaaltijd',
@@ -287,243 +325,6 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                       initialTime: const TimeOfDay(hour: 8, minute: 0),
                       locale: const Locale.fromSubtags(languageCode: 'nl'),
                     ),
-                    // FormBuilderDateRangePicker(
-                    //   name: 'date_range',
-                    //   firstDate: DateTime(0, 0, 0, 1, 1),
-                    //   lastDate: DateTime(2030),
-                    //   format: DateFormat('HH-mm'),
-                    //   onChanged: _onChanged,
-                    //   decoration: InputDecoration(
-                    //     labelText: 'Date Range',
-                    //     helperText: 'Helper text',
-                    //     hintText: 'Hint text',
-                    //     suffixIcon: IconButton(
-                    //       icon: const Icon(Icons.close),
-                    //       onPressed: () {
-                    //         _formKey.currentState.fields['date_range']
-                    //             ?.didChange(null);
-                    //       },
-                    //     ),
-                    //   ),
-                    // ),
-                    // FormBuilderSlider(
-                    //   name: 'slider',
-                    //   validator: FormBuilderValidators.compose([
-                    //     FormBuilderValidators.min(6),
-                    //   ]),
-                    //   onChanged: _onChanged,
-                    //   min: 0.0,
-                    //   max: 10.0,
-                    //   initialValue: 7.0,
-                    //   divisions: 20,
-                    //   activeColor: Colors.red,
-                    //   inactiveColor: Colors.pink[100],
-                    //   decoration: const InputDecoration(
-                    //     labelText: 'Number of things',
-                    //   ),
-                    // ),
-                    // FormBuilderRangeSlider(
-                    //   name: 'range_slider',
-                    //   // validator: FormBuilderValidators.compose([FormBuilderValidators.min(context, 6)]),
-                    //   onChanged: _onChanged,
-                    //   min: 00.00,
-                    //   max: 23.59,
-                    //   initialValue: const RangeValues(08.00, 16.00),
-                    //   divisions: 20,
-                    //   activeColor: Colors.red,
-                    //   inactiveColor: Colors.pink[100],
-                    //   decoration:
-                    //   const InputDecoration(labelText: 'Price Range'),
-                    // ),
-                    // FormBuilderCheckbox(
-                    //   name: 'accept_terms',
-                    //   initialValue: false,
-                    //   onChanged: _onChanged,
-                    //   title: RichText(
-                    //     text: const TextSpan(
-                    //       children: [
-                    //         TextSpan(
-                    //           text: 'I have read and agree to the ',
-                    //           style: TextStyle(color: Colors.black),
-                    //         ),
-                    //         TextSpan(
-                    //           text: 'Terms and Conditions',
-                    //           style: TextStyle(color: Colors.blue),
-                    //           // Flutter doesn't allow a button inside a button
-                    //           // https://github.com/flutter/flutter/issues/31437#issuecomment-492411086
-                    //           /*
-                    //           recognizer: TapGestureRecognizer()
-                    //             ..onTap = () {
-                    //               print('launch url');
-                    //             },
-                    //           */
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    //   validator: FormBuilderValidators.equal(
-                    //     true,
-                    //     errorText:
-                    //     'You must accept terms and conditions to continue',
-                    //   ),
-                    // ),
-                    // FormBuilderTextField(
-                    //   autovalidateMode: AutovalidateMode.always,
-                    //   name: 'age',
-                    //   decoration: InputDecoration(
-                    //     labelText: 'Age',
-                    //     suffixIcon: _ageHasError
-                    //         ? const Icon(Icons.error, color: Colors.red)
-                    //         : const Icon(Icons.check, color: Colors.green),
-                    //   ),
-                    //   onChanged: (val) {
-                    //     setState(() {
-                    //       _ageHasError = !(_formKey.currentState?.fields['age']
-                    //           ?.validate() ??
-                    //           false);
-                    //     });
-                    //   },
-                    //   // valueTransformer: (text) => num.tryParse(text),
-                    //   validator: FormBuilderValidators.compose([
-                    //     FormBuilderValidators.required(),
-                    //     FormBuilderValidators.max(120),
-                    //   ]),
-                    //   // initialValue: '12',
-                    //   keyboardType: TextInputType.text,
-                    //   textInputAction: TextInputAction.next,
-                    // ),
-                    // FormBuilderRadioGroup<String>(
-                    //   decoration: const InputDecoration(
-                    //     labelText: 'My chosen language',
-                    //   ),
-                    //   initialValue: null,
-                    //   name: 'best_language',
-                    //   onChanged: _onChanged,
-                    //   validator: FormBuilderValidators.compose(
-                    //       [FormBuilderValidators.required()]),
-                    //   options:
-                    //   ['Dart', 'Kotlin', 'Java', 'Swift', 'Objective-C']
-                    //       .map((lang) => FormBuilderFieldOption(
-                    //     value: lang,
-                    //     child: Text(lang),
-                    //   ))
-                    //       .toList(growable: false),
-                    //   controlAffinity: ControlAffinity.trailing,
-                    // ),
-                    // FormBuilderSegmentedControl(
-                    //   decoration: const InputDecoration(
-                    //     labelText: 'Movie Rating (Archer)',
-                    //   ),
-                    //   name: 'movie_rating',
-                    //   // initialValue: 1,
-                    //   // textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    //   options: List.generate(5, (i) => i + 1)
-                    //       .map((number) => FormBuilderFieldOption(
-                    //     value: number,
-                    //     child: Text(
-                    //       number.toString(),
-                    //       style: const TextStyle(
-                    //           fontWeight: FontWeight.bold),
-                    //     ),
-                    //   ))
-                    //       .toList(),
-                    //   onChanged: _onChanged,
-                    // ),
-                    // FormBuilderSwitch(
-                    //   title: const Text('I Accept the terms and conditions'),
-                    //   name: 'accept_terms_switch',
-                    //   initialValue: true,
-                    //   onChanged: _onChanged,
-                    // ),
-                    // FormBuilderCheckboxGroup<String>(
-                    //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                    //   decoration: const InputDecoration(
-                    //       labelText: 'The language of my people'),
-                    //   name: 'languages',
-                    //   // initialValue: const ['Dart'],
-                    //   options: const [
-                    //     FormBuilderFieldOption(value: 'Dart'),
-                    //     FormBuilderFieldOption(value: 'Kotlin'),
-                    //     FormBuilderFieldOption(value: 'Java'),
-                    //     FormBuilderFieldOption(value: 'Swift'),
-                    //     FormBuilderFieldOption(value: 'Objective-C'),
-                    //   ],
-                    //   onChanged: _onChanged,
-                    //   separator: const VerticalDivider(
-                    //     width: 10,
-                    //     thickness: 5,
-                    //     color: Colors.red,
-                    //   ),
-                    //   validator: FormBuilderValidators.compose([
-                    //     FormBuilderValidators.minLength(1),
-                    //     FormBuilderValidators.maxLength(3),
-                    //   ]),
-                    // ),
-                    // FormBuilderFilterChip<String>(
-                    //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                    //   decoration: const InputDecoration(
-                    //       labelText: 'The language of my people'),
-                    //   name: 'languages_filter',
-                    //   selectedColor: Colors.red,
-                    //   options: const [
-                    //     FormBuilderChipOption(
-                    //       value: 'Dart',
-                    //       avatar: CircleAvatar(child: Text('D')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Kotlin',
-                    //       avatar: CircleAvatar(child: Text('K')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Java',
-                    //       avatar: CircleAvatar(child: Text('J')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Swift',
-                    //       avatar: CircleAvatar(child: Text('S')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Objective-C',
-                    //       avatar: CircleAvatar(child: Text('O')),
-                    //     ),
-                    //   ],
-                    //   onChanged: _onChanged,
-                    //   validator: FormBuilderValidators.compose([
-                    //     FormBuilderValidators.minLength(1),
-                    //     FormBuilderValidators.maxLength(3),
-                    //   ]),
-                    // ),
-                    // FormBuilderChoiceChip<String>(
-                    //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                    //   decoration: const InputDecoration(
-                    //       labelText:
-                    //       'Ok, if I had to choose one language, it would be:'),
-                    //   name: 'languages_choice',
-                    //   initialValue: 'Dart',
-                    //   options: const [
-                    //     FormBuilderChipOption(
-                    //       value: 'Dart',
-                    //       avatar: CircleAvatar(child: Text('D')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Kotlin',
-                    //       avatar: CircleAvatar(child: Text('K')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Java',
-                    //       avatar: CircleAvatar(child: Text('J')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Swift',
-                    //       avatar: CircleAvatar(child: Text('S')),
-                    //     ),
-                    //     FormBuilderChipOption(
-                    //       value: 'Objective-C',
-                    //       avatar: CircleAvatar(child: Text('O')),
-                    //     ),
-                    //   ],
-                    //   onChanged: _onChanged,
-                    // ),
                   ],
                 ),
               ),
@@ -533,9 +334,20 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState?.saveAndValidate() ?? false) {
-                          debugPrint(_formKey.currentState?.value.toString());
+                          _formKey.currentState.save();
+                          updateWerkbon(
+                              this.widget.werkbonnen.id,
+                              model.weeknummer,
+                              model.datum.toString(),
+                              model.omschrijving,
+                              model.begintijd.toString(),
+                              model.pauze.toString(),
+                              model.eindtijd.toString(),
+                              model.totaaltijd.toString()
+                          );
+                          // debugPrint(model.toString());
                         } else {
-                          debugPrint(_formKey.currentState?.value.toString());
+                          // debugPrint(_formKey.currentState?.value.toString());
                           debugPrint('validation failed');
                         }
                       },
@@ -567,5 +379,4 @@ class _EditWerkbonnenPageState extends State<EditWerkbonnenPage> {
       ),
     );
   }
-
-  }
+}

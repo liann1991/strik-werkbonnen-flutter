@@ -36,7 +36,6 @@ class CreateWerkbonnenPage extends StatefulWidget {
 
 postWerkbon(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd) async {
   CallApi().postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, "werkbonnen");
-  print('gelukt!, $weeknummer, $datum, $omschrijving, $begintijd, $pauze, $eindtijd, $totaaltijd');
 }
 
 class FormModel {
@@ -57,7 +56,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
   var userInfo = '';
   final _formKey = GlobalKey<FormBuilderState>();
   final model = FormModel();
-  bool _genderHasError = false;
+  bool _omschrijvingHasError = false;
 
   /// Calculates number of weeks for a given year as per https://en.wikipedia.org/wiki/ISO_week_date#Weeks_per_year
   int numOfWeeks(int year) {
@@ -207,7 +206,7 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                       name: 'omschrijving',
                       decoration: InputDecoration(
                         labelText: 'omschrijving',
-                        suffix: _genderHasError
+                        suffix: _omschrijvingHasError
                             ? const Icon(Icons.error)
                             : const Icon(Icons.check),
                       ),

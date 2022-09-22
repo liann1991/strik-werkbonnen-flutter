@@ -38,6 +38,22 @@ class CallApi{
       }),
     );
   }
+  updateOmschrijvingData(id, data, apiUrl) async {
+    var token = await _getToken();
+    var fullUrl = _url + apiUrl + '/$id';
+    return await http.put(
+      Uri.parse(fullUrl),
+      headers:
+      {
+        'Content-type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer $token'
+      },
+      body: jsonEncode(<String, String>{
+        'omschrijving': data,
+      }),
+    );
+  }
   postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, apiUrl) async {
     var token = await _getToken();
     var fullUrl = _url + apiUrl;
@@ -60,6 +76,31 @@ class CallApi{
       }),
     );
   }
+
+  updateWerkbonData(id, weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, apiUrl) async {
+    var token = await _getToken();
+    var fullUrl = _url + apiUrl + '/$id';
+    return await http.put(
+      Uri.parse(fullUrl),
+      headers:
+      {
+        'Content-type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer $token'
+      },
+      body: jsonEncode({
+        'id': id,
+        'weeknummer': weeknummer,
+        'datum': datum,
+        'omschrijving': omschrijving,
+        'begintijd': begintijd,
+        'pauze': pauze,
+        'eindtijd': eindtijd,
+        'totaaltijd': totaaltijd,
+      }),
+    );
+  }
+
   getData(apiUrl) async {
     var token = await _getToken();
     var fullUrl = _url + apiUrl;
