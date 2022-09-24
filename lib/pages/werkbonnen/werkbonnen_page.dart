@@ -1,16 +1,13 @@
 import 'dart:convert';
-import 'dart:math';
-import 'package:flappy_search_bar/flappy_search_bar.dart';
+// import 'package:flappy_search_bar/flappy_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_backend/api/my_api.dart';
 import 'package:flutter_app_backend/components/text_widget.dart';
 import 'package:flutter_app_backend/models/get_werkbonnen_info.dart';
-import 'package:flutter_app_backend/models/get_werkomschrijvingen_info.dart';
 import 'package:flutter_app_backend/pages/werkbonnen/edit_werkbonnen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../components/menu.dart';
 import 'create_werkbonnen.dart';
 import 'detail_werkbonnen.dart';
@@ -60,8 +57,6 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double height=MediaQuery.of(context).size.height;
-    final double width=MediaQuery.of(context).size.width;
     return Scaffold(
         drawer: Menu(),
         appBar: AppBar(

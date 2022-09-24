@@ -1,8 +1,8 @@
 import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+
 class CallApi{
   final String _url = 'https://login.strik-elektrotechniek.nl/api/';
   final String _imgUrl='https://login.strik-elektrotechniek.nl/assets/img/';
