@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_backend/pages/werkomschrijvingen/werkomschrijvingen_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/my_api.dart';
 import '../../components/menu.dart';
@@ -129,7 +130,8 @@ class _CreateWerkomschrijvingPageState extends State<CreateWerkomschrijvingPage>
                         if (_formKey.currentState?.saveAndValidate() ?? false) {
                           _formKey.currentState.save();
                           postOmschrijving(model.omschrijving.toString());
-                          debugPrint(model.toString());
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => WerkomschrijvingenPage()));
                         } else {
                           debugPrint(_formKey.currentState?.value.toString());
                           debugPrint('validation failed');
@@ -147,7 +149,6 @@ class _CreateWerkomschrijvingPageState extends State<CreateWerkomschrijvingPage>
                       onPressed: () {
                         _formKey.currentState?.reset();
                       },
-                      // color: Theme.of(context).colorScheme.secondary,
                       child: Text(
                         'Reset',
                         style: TextStyle(

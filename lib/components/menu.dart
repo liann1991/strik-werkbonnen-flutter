@@ -1,11 +1,4 @@
-import 'dart:convert';
-import 'dart:js';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_app_backend/signup_login/sign_in.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../api/my_api.dart';
 import '../pages/werkbonnen/werkbonnen_page.dart';
 import '../pages/werkomschrijvingen/werkomschrijvingen_page.dart';
 

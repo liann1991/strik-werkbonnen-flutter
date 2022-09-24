@@ -54,6 +54,19 @@ class CallApi{
       }),
     );
   }
+  deleteData(id, apiUrl) async {
+    var token = await _getToken();
+    var fullUrl = _url + apiUrl + '/$id';
+    return await http.delete(
+      Uri.parse(fullUrl),
+      headers:
+      {
+        'Content-type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer $token'
+      },
+    );
+  }
   postWerkbonData(weeknummer, datum, omschrijving, begintijd, pauze, eindtijd, totaaltijd, apiUrl) async {
     var token = await _getToken();
     var fullUrl = _url + apiUrl;

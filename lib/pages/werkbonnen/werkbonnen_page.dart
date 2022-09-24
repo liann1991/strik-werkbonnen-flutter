@@ -7,6 +7,7 @@ import 'package:flutter_app_backend/components/text_widget.dart';
 import 'package:flutter_app_backend/models/get_werkbonnen_info.dart';
 import 'package:flutter_app_backend/models/get_werkomschrijvingen_info.dart';
 import 'package:flutter_app_backend/pages/werkbonnen/edit_werkbonnen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,7 +32,7 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
     _getWerkbonnen();
     super.initState();
   }
-  
+
   _getWerkbonnen() async {
     SharedPreferences localStorage = await SharedPreferences.getInstance();
     var user = localStorage.getString("username");
@@ -49,11 +50,10 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
   }
   _initData() async {
     CallApi().getPublicData("werkbonnen").then((response){
-      // print(json.decode(response.body)['data']);
       setState(() {
         // List list = (jsonDecode(response.body)['data'] as List<dynamic>) ;
         Iterable list = json.decode(response.body)['data'];
-        werkbonnen= list.map((model)=>Werkbon.fromJson(model)).toList();
+        werkbonnen = list.map((model)=>Werkbon.fromJson(model)).toList();
       });
     });
   }
@@ -88,26 +88,33 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.only(left:20, right: 100, top:20),
+                    padding: const EdgeInsets.only(left:20, right: 20, top:20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextWidget(
+                        Flexible(
+                        child: TextWidget(
                             text:"Datum:",
-                            fontSize: 16,
+                            fontSize: 13,
                             color:Colors.black
                         ),
-                        TextWidget(
+          ),
+                        Flexible(
+                        child: TextWidget(
                             text:"Omschrijving:",
-                            fontSize: 16,
+                            fontSize: 13,
                             color:Colors.black
                         ),
-                        TextWidget(
+                        ),
+                        Flexible(
+                        child: TextWidget(
                             text:"Totaaltijd:",
-                            fontSize: 16,
+                            fontSize: 13,
                             color:Colors.black
                         ),
-                        ElevatedButton.icon(
+                        ),
+                        Flexible(
+                        child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             onPrimary: Colors.white,
                             primary: Colors.blue,
@@ -119,7 +126,8 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                             );
                           },
                           icon: Icon(Icons.add, size: 20),
-                          label: Text("Nieuwe werkbon"),
+                          label: Text(""),
+                        ),
                         ),
                       ],
                     ),
@@ -136,7 +144,7 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                                 );
                               },
                               child:Container(
-                                  padding: const EdgeInsets.only(left:20, right: 100),
+                                  padding: const EdgeInsets.only(left:20, right: 0),
                                   height: 170,
                                   decoration: BoxDecoration(
                                       border: Border(
@@ -150,23 +158,29 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          TextWidget(
+                                          Flexible(
+                                          child: TextWidget(
                                               text:DateFormat('dd-MM-yyyy').format(werkbon.datum),
                                               fontSize: 16,
                                               color:Colors.black
                                           ),
-                                          TextWidget(
-                                              text:werkbon.werkomschrijving.omschrijving,
+                                          ),
+                                          Flexible(
+                                          child: TextWidget(
+                                              text: werkbon.werkomschrijving.omschrijving,
                                               fontSize: 16,
                                               color:Colors.black
                                           ),
-                                          TextWidget(
+                                          ),
+                                          Flexible(
+                                          child: TextWidget(
                                               text:werkbon.totaaltijdDag,
                                               fontSize: 16,
                                               color:Colors.black
                                           ),
+                                          ),
                                           Container(
-                                              padding: const EdgeInsets.only(top: 20),
+                                              padding: const EdgeInsets.only(top: 20, right: 20),
                                               child:Column(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -183,7 +197,7 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                                                       );
                                                     },
                                                     icon: Icon(Icons.edit, size: 22),
-                                                    label: Text("Wijzigen"),
+                                                    label: Text(""),
                                                   ),
                                                   Divider(
                                                       color:Colors.white
@@ -194,10 +208,22 @@ class _WerkbonnenPageState extends State<WerkbonnenPage> {
                                                       primary: Colors.red,
                                                     ),
                                                     onPressed: () {
-                                                      // Respond to button press
+                                                      CallApi().deleteData(werkbon.id, "werkbonnen");
+                                                      Fluttertoast.showToast(
+                                                          msg: "De werkbon is succesvol verwijderd",
+                                                          toastLength: Toast.LENGTH_SHORT,
+                                                          gravity: ToastGravity.CENTER,
+                                                          timeInSecForIosWeb: 1,
+                                                          backgroundColor: Colors.red,
+                                                          textColor: Colors.white,
+                                                          fontSize: 16.0
+                                                      );
+                                                      Navigator.pop(context);
+                                                      Navigator.push(context, MaterialPageRoute(
+                                                          builder: (context) => WerkbonnenPage()));
                                                     },
                                                     icon: Icon(Icons.delete, size: 20),
-                                                    label: Text("Verwijderen"),
+                                                    label: Text(""),
                                                   ),
                                                 ],
                                               )

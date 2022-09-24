@@ -68,9 +68,8 @@ class _SignInState extends State<SignIn> {
     return
       Scaffold(
         backgroundColor: Color(0xFFffffff),
-
-        body:
-        Container(
+        body: SingleChildScrollView(
+        child: Container(
           padding: const EdgeInsets.only(left: 30, right: 40),
           child:Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,43 +97,21 @@ class _SignInState extends State<SignIn> {
             SizedBox(height: height*.05,),
             TextInput(textString:"Password", textController:textController, hint:"Wachtwoord", obscureText: true,),
             SizedBox(height: height*.05,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-              TextWidget(text:"Inloggen", fontSize:22, isUnderLine:false),
-
-                GestureDetector(
-
-                  onTap: (){
-                    _login();
-                  },
-                  child:
-                Container(
-                  height: 80,
-                  width: 80,
-                  decoration: BoxDecoration(
-                    shape:BoxShape.circle,
-                        color:Color(0xFF363f93),
-                  ),
-                  child: Icon(Icons.arrow_forward, color:Colors.white, size:30),
-                )
-                )
-              ],
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                onPrimary: Colors.white,
+                primary: Colors.lightBlue,
+              ),
+              onPressed: () {
+                _login();
+              },
+              icon: Icon(Icons.arrow_forward, size: 22),
+              label: Text("Inloggen"),
             ),
-            SizedBox(height:height*0.1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: (){
-                  },
-                    child:TextWidget(text:"Wachtwoord vergeten", fontSize:16, isUnderLine:true),
-                )
-              ],
-            )
-          ],
+    ],
         ),
         )
+      ),
       );
   }
 }

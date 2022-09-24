@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_backend/pages/werkbonnen/werkbonnen_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../api/my_api.dart';
 import '../../components/menu.dart';
@@ -327,6 +328,8 @@ class _CreateWerkbonnenPageState extends State<CreateWerkbonnenPage> {
                               model.eindtijd.toString(),
                               model.totaaltijd.toString()
                           );
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => WerkbonnenPage()));
                           // debugPrint(model.toString());
                         } else {
                           // debugPrint(_formKey.currentState?.value.toString());

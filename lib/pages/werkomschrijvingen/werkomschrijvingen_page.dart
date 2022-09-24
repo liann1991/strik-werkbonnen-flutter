@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_backend/api/my_api.dart';
 import 'package:flutter_app_backend/components/text_widget.dart';
 import 'package:flutter_app_backend/models/get_werkomschrijvingen_info.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../components/menu.dart';
-import '../werkbonnen/detail_werkbonnen.dart';
 import 'create_werkomschrijving.dart';
 import 'detail_werkomschrijving.dart';
 import 'edit_werkomschrijving.dart';
@@ -59,7 +59,6 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
   @override
   Widget build(BuildContext context) {
     final double height=MediaQuery.of(context).size.height;
-    final double width=MediaQuery.of(context).size.width;
     return Scaffold(
         drawer: Menu(),
         appBar: AppBar(
@@ -96,22 +95,27 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.only(left:20, right: 100, top:20),
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.only(left:20, right: 0, top:20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextWidget(
+                        Flexible(
+                        child: TextWidget(
                             text:"Aangemaakt:",
-                            fontSize: 16,
+                            fontSize: 14,
                             color:Colors.black
                         ),
-                        TextWidget(
+                        ),
+                        Flexible(
+                        child: TextWidget(
                             text:"Omschrijving:",
-                            fontSize: 16,
+                            fontSize: 14,
                             color:Colors.black
                         ),
-                        ElevatedButton.icon(
+                        ),
+                        Flexible(
+                        child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             onPrimary: Colors.white,
                             primary: Colors.blue,
@@ -123,7 +127,8 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                             );
                           },
                           icon: Icon(Icons.add, size: 20),
-                          label: Text("Nieuwe omschrijving"),
+                          label: Text(""),
+                        ),
                         ),
                         Divider(),
                       ],
@@ -141,7 +146,7 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                                 );
                               },
                               child:Container(
-                                  padding: const EdgeInsets.only(left:20, right: 100),
+                                  padding: const EdgeInsets.only(left:20, right: 20),
                                   height: 170,
                                   decoration: BoxDecoration(
                                       border: Border(
@@ -155,15 +160,19 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          TextWidget(
+                                          Flexible(
+                                          child: TextWidget(
                                               text:werkomschrijvingen.createdAt,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                               color:Colors.black
                                           ),
-                                          TextWidget(
+                                          ),
+                                          Flexible(
+                                          child: TextWidget(
                                               text:werkomschrijvingen.omschrijving,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                               color:Colors.black
+                                          ),
                                           ),
                                           Container(
                                               padding: const EdgeInsets.only(top: 20),
@@ -182,8 +191,8 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                                                         MaterialPageRoute(builder: (context) => EditWerkomschrijvingPage(werkomschrijvingen:werkomschrijvingen, index:0)),
                                                       );
                                                     },
-                                                    icon: Icon(Icons.edit, size: 22),
-                                                    label: Text("Wijzigen"),
+                                                    icon: Icon(Icons.edit, size: 20),
+                                                    label: Text(""),
                                                   ),
                                                   Divider(
                                                       color:Colors.white
@@ -194,10 +203,22 @@ class _WerkomschrijvingenPageState extends State<WerkomschrijvingenPage> {
                                                       primary: Colors.red,
                                                     ),
                                                     onPressed: () {
-                                                      // Respond to button press
+                                                        CallApi().deleteData(werkomschrijvingen.id, "werkomschrijving");
+                                                          Fluttertoast.showToast(
+                                                              msg: "De omschrijving is succesvol verwijderd",
+                                                              toastLength: Toast.LENGTH_SHORT,
+                                                              gravity: ToastGravity.CENTER,
+                                                              timeInSecForIosWeb: 1,
+                                                              backgroundColor: Colors.red,
+                                                              textColor: Colors.white,
+                                                              fontSize: 14
+                                                      );
+                                                        Navigator.pop(context);
+                                                        Navigator.push(context, MaterialPageRoute(
+                                                            builder: (context) => WerkomschrijvingenPage()));
                                                     },
                                                     icon: Icon(Icons.delete, size: 20),
-                                                    label: Text("Verwijderen"),
+                                                    label: Text(""),
                                                   ),
                                                 ],
                                               )
